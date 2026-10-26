@@ -1,0 +1,26 @@
+# Démo Permify : le moteur + son application (port 3003).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # Permify : le moteur. Données en mémoire (base par défaut de Permify).
+  permify:
+    image: ghcr.io/permify/permify:v1.7.5
+    command: ["serve"]
+
+  # L'application de démo pour Permify : la page web + l'API qui pose les questions au moteur
+  app-permify:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3003
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+      PERMIFY_URL: http://permify:3476
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3003:3003"   # la démo : http://localhost:3003
+    depends_on:
+      - permify

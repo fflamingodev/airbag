@@ -1,0 +1,4 @@
+# Fins de ligne : scripts Mac/Linux en LF, scripts Windows en CRLF
+*.sh   text eol=lf
+*.bat  text eol=crlf
+*.ps1  text eol=crlf

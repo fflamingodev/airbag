@@ -1,0 +1,22 @@
+# Démo Keycloak KAS : pas de moteur en plus, l'app parle au Keycloak déjà en place (port 3006).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # L'application de démo pour Keycloak KAS : la page web + l'API qui pose les questions à Keycloak
+  app-keycloak-kas:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3006
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      # Compte d'administration de démo : l'app CONSTRUIT la configuration KAS au démarrage.
+      # En vrai : un compte de service avec le seul droit de gérer l'autorisation de ce client.
+      KEYCLOAK_ADMIN_UTILISATEUR: admin
+      KEYCLOAK_ADMIN_MOT_DE_PASSE: admin
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3006:3006"   # la démo : http://localhost:3006

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démo autorisation RE-SKIN</title>
+<style>
+  :root { --fond:#f5f6f8; --carte:#fff; --texte:#1f2933; --doux:#5f6b7a; --bord:#dfe3e8;
+          --bleu:#1f3864; --vert:#1e7b4a; --vertf:#e3f4ea; --rouge:#b42318; --rougef:#fdecea; --gris:#eef0f3; --orange:#b54708; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--fond); color:var(--texte); font-size:15px; }
+  header { background:var(--bleu); color:#fff; padding:16px 24px; }
+  header h1 { margin:0; font-size:20px; }
+  header p { margin:4px 0 0; opacity:.85; font-size:13px; }
+  nav { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+  nav a { color:#fff; text-decoration:none; font-size:13px; padding:4px 10px; border:1px solid rgba(255,255,255,.4); border-radius:20px; }
+  nav a.actif { background:#fff; color:var(--bleu); font-weight:bold; }
+  main { max-width:1180px; margin:0 auto; padding:20px 16px 40px; display:grid; gap:16px; }
+  .carte { background:var(--carte); border:1px solid var(--bord); border-radius:10px; padding:16px 18px; min-width:0; }
+  .carte h2 { margin:0 0 10px; font-size:16px; color:var(--bleu); }
+  .doux { color:var(--doux); font-size:13px; }
+  button { font:inherit; padding:8px 14px; border-radius:7px; border:1px solid var(--bleu); background:var(--bleu); color:#fff; cursor:pointer; }
+  button.second { background:#fff; color:var(--bleu); }
+  button:disabled { opacity:.5; cursor:default; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid var(--bord); padding:7px 9px; text-align:left; vertical-align:top; font-size:13.5px; }
+  th { background:var(--gris); font-size:12.5px; }
+  .ok { background:var(--vertf); color:var(--vert); font-weight:bold; }
+  .non { background:var(--rougef); color:var(--rouge); font-weight:bold; }
+  .ecart { outline:3px solid var(--orange); outline-offset:-3px; }
+  .detail { display:block; font-weight:normal; font-size:11.5px; color:var(--doux); margin-top:2px; }
+  .defile { overflow-x:auto; }
+  #banc td, #banc th { text-align:center; padding:5px 6px; }
+  #banc td:first-child, #banc th:first-child { text-align:left; white-space:nowrap; }
+  #banc th { font-weight:normal; font-size:11.5px; }
+  pre { background:#1f2933; color:#e6edf3; padding:12px; border-radius:8px; overflow:auto; font-size:12.5px; margin:0; max-height:420px; }
+  .deux { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:860px) { .deux { grid-template-columns:1fr; } }
+  ul { margin:6px 0 0; padding-left:20px; }
+  li { margin:3px 0; }
+  .ligne { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .resume { font-size:15px; margin:10px 0 0; }
+  /* Écran « Ce que voit le compte » */
+  .ecran { background:#f0f4fa; border:1px solid var(--bord); border-radius:12px; padding:14px; max-width:720px; }
+  .ecran .barre { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; color:var(--doux); }
+  .noeud { background:#fff; border:1px solid var(--bord); border-radius:10px; padding:10px 12px; margin:8px 0; }
+  .noeud .titre { font-weight:bold; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .noeud .info { font-size:13px; color:var(--texte); margin-top:4px; }
+  .noeud .enfants { margin-left:22px; border-left:2px solid var(--bord); padding-left:12px; }
+  .noeud.chemin { background:transparent; border-style:dashed; }
+  .noeud.chemin > .titre { color:var(--doux); font-weight:normal; }
+  .noeud.cache { opacity:.45; background:repeating-linear-gradient(45deg,#fff,#fff 6px,#f3f3f3 6px,#f3f3f3 12px); }
+  .boutons { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .boutons button { padding:5px 10px; font-size:13px; }
+  .boutons button.bloque { background:#eee; color:#999; border-color:#ccc; cursor:not-allowed; }
+  .prive { font-size:12.5px; color:var(--doux); font-style:italic; }
+  .etiquette { font-size:11px; font-weight:normal; padding:2px 7px; border-radius:10px; background:var(--gris); color:var(--doux); }
+  #erreur { display:none; background:var(--rougef); color:var(--rouge); border:1px solid #f3b8b2; }
+  #message { display:none; background:var(--vertf); color:var(--vert); border:1px solid #b7e1c7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Démo « hello world » : Keycloak + <span id="nomMoteur">…</span></h1>
+  <p id="explication"></p>
+  <nav id="demos"></nav>
+</header>
+<main>
+  <div class="carte" id="erreur"></div>
+  <div class="carte" id="message"></div>
+
+  <div class="carte">
+    <h2>1. Connexion</h2>
+    <div id="deconnecte">
+      <p class="doux">Mot de passe = nom du compte. La connexion est partagée entre les 5 démos (même Keycloak) : pour changer de compte, déconnectez-vous ou utilisez une fenêtre privée.</p>
+      <div class="defile"><table id="comptes"></table></div>
+      <p style="margin:12px 0 0"><button id="btnConnexion">Se connecter avec Keycloak</button></p>
+    </div>
+    <div id="connecte" style="display:none">
+      <div class="ligne">
+        <span>Connecté : <b id="qui"></b></span>
+        <span class="doux">Rôles Keycloak dans l'app : <b id="roles"></b></span>
+        <button class="second" id="btnDeconnexion">Se déconnecter</button>
+      </div>
+      <p class="doux" id="typeCompte" style="margin:8px 0 0"></p>
+    </div>
+  </div>
+
+  <div class="carte">
+    <h2>2. Ce que voit le compte</h2>
+    <p class="doux">L'écran de l'app tel que ce compte le verrait : seuls les éléments et les boutons autorisés apparaissent. Chaque bouton redemande l'accord au moteur côté serveur (cacher un bouton ne suffit pas à protéger).</p>
+    <label class="doux"><input type="checkbox" id="voirCache"> Montrer aussi ce qui est caché (grisé, pour comprendre)</label>
+    <div class="ecran" id="ecran" style="margin-top:10px"><p class="doux">Connectez-vous pour voir.</p></div>
+  </div>
+
+  <div class="carte">
+    <h2>3. Mes droits (compte connecté)</h2>
+    <p class="doux">17 questions posées au moteur. « Attendu » vient du scénario commun ; un cadre orange signale une réponse différente de l'attendu.</p>
+    <div class="defile"><table id="droits"><tr><td class="doux">Connectez-vous pour voir.</td></tr></table></div>
+    <p style="margin:10px 0 0"><button id="btnDroits" disabled>Retester</button></p>
+  </div>
+
+  <div class="carte">
+    <h2>4. Déléguer / révoquer</h2>
+    <p class="doux">Le propriétaire retire (ou rend) le rôle de facility manager à <b>fanny</b>. C'est le moteur qui décide qui peut le faire : seul <b>olivier</b> (propriétaire) y arrive. Ensuite, regardez la ligne « fanny » du banc de test : couper la branche lui retire tout.</p>
+    <div class="ligne">
+      <button id="btnRetirer" disabled>Retirer le rôle à fanny</button>
+      <button class="second" id="btnRendre" disabled>Rendre le rôle à fanny</button>
+      <span class="doux" id="etatFanny"></span>
+    </div>
+  </div>
+
+  <div class="carte">
+    <h2>5. Banc de test : tous les comptes d'un coup</h2>
+    <p class="doux">Les 17 questions pour les 11 comptes, posées au moteur sans se reconnecter. ✅ autorisé, ⛔ refusé, « K » = refusé par Keycloak (niveau 1).</p>
+    <p style="margin:0 0 10px"><button id="btnBanc" disabled>Lancer le banc de test</button></p>
+    <div class="defile"><table id="banc"></table></div>
+    <p class="resume" id="resumeBanc"></p>
+  </div>
+
+  <div class="deux">
+    <div class="carte">
+      <h2>6. Les règles et le modèle</h2>
+      <p class="doux">Les règles, en français (les mêmes pour tous les moteurs) :</p>
+      <ul id="regles"></ul>
+      <p class="doux" style="margin-top:14px">Le modèle, dans la langue de ce moteur :</p>
+      <pre id="modele"></pre>
+    </div>
+    <div class="carte">
+      <h2>7. Ce que le moteur contient</h2>
+      <p class="doux">Les relations enregistrées, au format du moteur :</p>
+      <pre id="relations">Connectez-vous pour voir.</pre>
+    </div>
+  </div>
+
+  <div class="carte">
+    <h2>8. Journal des décisions</h2>
+    <div class="defile"><table id="journal"><tr><td class="doux">Aucune décision pour l'instant.</td></tr></table></div>
+  </div>
+</main>
+
+<script>
+// =====================================================================
+// La connexion avec Keycloak, écrite à la main pour voir chaque étape.
+// Protocole : OpenID Connect, « code d'autorisation + PKCE ».
+//   1) on envoie le navigateur chez Keycloak avec un défi (challenge)
+//   2) Keycloak renvoie un code à usage unique
+//   3) on échange ce code (+ le secret du défi) contre un jeton
+// Le jeton reste en mémoire (il disparaît si on recharge la page).
+// =====================================================================
+let CONFIG, jeton = null, jetonId = null;
+const $ = (id) => document.getElementById(id);
+const ACTIONS = { voir: 'voir', modifier_structure: 'modifier la structure', gerer_menages: 'gérer les ménages',
+  gerer_evenements: 'gérer les événements', deleguer: 'déléguer', voir_mesures: 'voir les mesures', inviter: 'inviter',
+  voir_donnees: 'voir les données', piloter: 'piloter' };
+const COURT = { 'batiment:A': 'A', 'batiment:B': 'B', 'espace:A-communs': 'Communs', 'espace:A1': 'A1', 'espace:A2': 'A2', 'espace:B1': 'B1',
+  'machine:M1': 'M1', 'machine:M2': 'M2' };
+
+function base64url(octets) {
+  return btoa(String.fromCharCode(...new Uint8Array(octets))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+const aleatoire = () => base64url(crypto.getRandomValues(new Uint8Array(32)));
+const urlKeycloak = (fin) => `${CONFIG.keycloak}/realms/${CONFIG.realm}/protocol/openid-connect/${fin}`;
+const retour = () => window.location.origin + '/';
+
+async function seConnecter() {
+  const verificateur = aleatoire();                       // le secret, gardé ici
+  const defi = base64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verificateur)));
+  const etat = aleatoire();                               // protège contre une réponse qui ne vient pas de nous
+  sessionStorage.setItem('pkce', JSON.stringify({ verificateur, etat }));
+  const p = new URLSearchParams({ client_id: CONFIG.client, redirect_uri: retour(), response_type: 'code',
+    scope: 'openid', code_challenge: defi, code_challenge_method: 'S256', state: etat });
+  window.location = urlKeycloak('auth') + '?' + p;
+}
+
+async function terminerConnexion() {
+  const p = new URLSearchParams(window.location.search);
+  if (!p.get('code')) return false;
+  const memo = JSON.parse(sessionStorage.getItem('pkce') || '{}');
+  sessionStorage.removeItem('pkce');
+  history.replaceState({}, '', '/');                      // on retire le code de l'adresse
+  if (p.get('state') !== memo.etat) throw new Error("Réponse de Keycloak inattendue (state).");
+  const r = await fetch(urlKeycloak('token'), { method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'authorization_code', code: p.get('code'), redirect_uri: retour(),
+      client_id: CONFIG.client, code_verifier: memo.verificateur }) });
+  const t = await r.json();
+  if (!r.ok) throw new Error('Keycloak refuse : ' + (t.error_description || t.error));
+  jeton = t.access_token; jetonId = t.id_token;
+  return true;
+}
+
+function seDeconnecter() {
+  const p = new URLSearchParams({ client_id: CONFIG.client, post_logout_redirect_uri: retour(), id_token_hint: jetonId });
+  window.location = urlKeycloak('logout') + '?' + p;
+}
+
+// ---------------------------------------------------------------------
+// Les appels à l'API de la démo (toujours avec le jeton)
+// ---------------------------------------------------------------------
+async function api(methode, chemin, corps) {
+  const r = await fetch(chemin, { method: methode,
+    headers: { Authorization: 'Bearer ' + jeton, 'Content-Type': 'application/json' },
+    body: corps ? JSON.stringify(corps) : undefined });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.erreur || r.status);
+  return d;
+}
+
+
+// ---------------------------------------------------------------------
+// L'écran « Ce que voit le compte » (construit à partir des réponses du moteur)
+// ---------------------------------------------------------------------
+// Des valeurs inventées, seulement pour l'affichage
+const DONNEES = {
+  'espace:A-communs': '🌡️ 20,8 °C · CO₂ 610 ppm', 'espace:A1': '🌡️ 21,5 °C · CO₂ 780 ppm · 💧 48 %', 'espace:A2': '🌡️ 17,2 °C · logement vide',
+  'espace:B1': '🌡️ 22,1 °C · CO₂ 540 ppm · 💧 45 %',
+  'machine:M1': '♨️ Pompe à chaleur ThermoX · départ 45 °C · en marche', 'machine:M2': '🌬️ Ventilation AirPlus · débit 60 %',
+};
+const ARBRES = [{ id: 'batiment:A', nom: '🏢 Bâtiment A', enfants: [
+  { id: 'espace:A-communs', nom: '🚪 Parties communes', enfants: [{ id: 'machine:M2', nom: '⚙️ Machine M2' }] },
+  { id: 'espace:A1', nom: '🏠 Logement A1', etiquette: 'occupé · ménage Dupont', enfants: [{ id: 'machine:M1', nom: '⚙️ Machine M1' }] },
+  { id: 'espace:A2', nom: '🏠 Logement A2', etiquette: 'vide', enfants: [] },
+] }, { id: 'batiment:B', nom: '🏢 Bâtiment B', enfants: [
+  { id: 'espace:B1', nom: '🏠 Logement B1', etiquette: 'occupé · ménage Delille', enfants: [] },
+] }];
+const BOUTONS = {
+  'batiment:A': [['modifier_structure', '✏️ Modifier la structure'], ['gerer_menages', '👪 Gérer les ménages'], ['gerer_evenements', '📅 Gérer les événements'], ['deleguer', '🔑 Déléguer']],
+  'espace:A1': [['inviter', '➕ Inviter quelqu’un']], 'espace:B1': [['inviter', '➕ Inviter quelqu’un']],
+  'batiment:B': [['modifier_structure', '✏️ Modifier la structure']],
+  'machine:M1': [['piloter', '🎛️ Piloter']], 'machine:M2': [['piloter', '🎛️ Piloter']],
+};
+let derniersDroits = [];
+const peut = (objet, action) => derniersDroits.some((l) => l.objet === objet && l.action === action && l.autorise);
+const lecture = { batiment: 'voir', espace: 'voir_mesures', machine: 'voir_donnees' };
+const voitObjet = (id) => peut(id, lecture[id.split(':')[0]]);
+const aUnBouton = (id) => (BOUTONS[id] || []).some(([a]) => peut(id, a));
+// Un élément apparaît s'il est lisible, s'il a un bouton autorisé, ou s'il mène à un enfant visible
+const visible = (n) => voitObjet(n.id) || aUnBouton(n.id) || (n.enfants || []).some(visible);
+
+function dessinerNoeud(n, montrerCache) {
+  const lisible = voitObjet(n.id);
+  const montre = visible(n);
+  if (!montre && !montrerCache) return '';
+  const type = n.id.split(':')[0];
+  // « chemin » : on ne voit pas cet élément, seulement qu'il mène à quelque chose de visible
+  const classe = !montre ? 'cache' : (!lisible && type === 'batiment' ? 'chemin' : '');
+  let info = '';
+  if (type !== 'batiment') {
+    if (lisible) info = `<div class="info">${DONNEES[n.id]}</div>`;
+    else if (montre || montrerCache) info = `<div class="prive">🔒 ${type === 'machine' ? 'données de la machine' : 'mesures de cet espace'} non visibles pour ce compte</div>`;
+  } else if (!lisible) info = '<div class="prive">accès limité : vous ne voyez que ce qui vous concerne dans ce bâtiment</div>';
+  const boutons = (BOUTONS[n.id] || []).map(([a, libelle]) => peut(n.id, a)
+    ? `<button data-action="${a}" data-objet="${n.id}">${libelle}</button>`
+    : (montrerCache ? `<button class="bloque" disabled title="refusé par le moteur">🔒 ${libelle.slice(2)}</button>` : '')).join('');
+  const enfants = (n.enfants || []).map((e) => dessinerNoeud(e, montrerCache)).join('');
+  return `<div class="noeud ${classe}"><div class="titre">${n.nom}${n.etiquette ? ` <span class="etiquette">${n.etiquette}</span>` : ''}</div>${info}` +
+    `${boutons ? `<div class="boutons">${boutons}</div>` : ''}${enfants ? `<div class="enfants">${enfants}</div>` : ''}</div>`;
+}
+
+function dessinerEcran() {
+  const montrerCache = $('voirCache').checked;
+  let h = `<div class="barre"><span>📱 App RE-SKIN · ${$('qui').textContent}</span><span>${CONFIG.moteur.nom}</span></div>`;
+  const contenu = ARBRES.map((n) => dessinerNoeud(n, montrerCache)).join('');
+  h += contenu;
+  if (!contenu) h += '<p class="doux">Rien à afficher : ce compte ne voit aucun bâtiment, aucun logement et aucune machine.</p>';
+  $('ecran').innerHTML = h;
+  for (const bt of $('ecran').querySelectorAll('button[data-action]')) {
+    bt.onclick = async () => {
+      $('message').style.display = 'none'; $('erreur').style.display = 'none';
+      try {
+        const r = await api('POST', '/api/action', { action: bt.dataset.action, objet: bt.dataset.objet });
+        $('message').style.display = 'block'; $('message').textContent = r.message;
+        await rafraichir();
+      } catch (e) { montrerErreur(e); }
+    };
+  }
+}
+
+const signe = (oui) => (oui ? '✅' : '⛔');
+
+async function mesDroits() {
+  const lignes = await api('GET', '/api/mes-droits');
+  derniersDroits = lignes;
+  dessinerEcran();
+  $('droits').innerHTML = '<tr><th>Objet</th><th>Action</th><th>Attendu</th><th>Réponse</th></tr>' + lignes.map((l) =>
+    `<tr><td>${l.libelle}</td><td>${ACTIONS[l.action]}</td><td>${signe(l.attendu)} ${l.attendu ? 'oui' : 'non'}</td>` +
+    `<td class="${l.autorise ? 'ok' : 'non'} ${l.conforme ? '' : 'ecart'}">${signe(l.autorise)} ${l.autorise ? 'Autorisé' : 'Refusé'}` +
+    `<span class="detail">par ${l.par}${l.par === 'Keycloak' ? ' (niveau 1)' : ' en ' + l.duree_ms + ' ms'}${l.conforme ? '' : ' · DIFFÉRENT DE L’ATTENDU'}</span></td></tr>`).join('');
+  await rafraichir();
+}
+
+async function banc() {
+  $('btnBanc').disabled = true;
+  try {
+    const b = await api('GET', '/api/banc');
+    const cas = b.comptes[0].lignes;
+    let h = '<tr><th>Compte</th>' + cas.map((c) => `<th>${COURT[c.objet]}<br>${ACTIONS[c.action]}</th>`).join('') + '</tr>';
+    for (const c of b.comptes) {
+      h += `<tr><td><b>${c.nom}</b></td>` + c.lignes.map((l) =>
+        `<td class="${l.autorise ? 'ok' : 'non'} ${l.conforme ? '' : 'ecart'}" title="${l.libelle} · ${ACTIONS[l.action]} · attendu : ${l.attendu ? 'oui' : 'non'}">` +
+        `${l.par === 'Keycloak' ? 'K' : signe(l.autorise)}</td>`).join('') + '</tr>';
+    }
+    $('banc').innerHTML = h;
+    $('resumeBanc').innerHTML = `<b>${b.conformes} / ${b.total}</b> réponses conformes à l'attendu · ` +
+      `${b.appels} questions au moteur en ${b.duree_totale_ms} ms (moyenne ${b.duree_moyenne_ms} ms par question)`;
+  } finally { $('btnBanc').disabled = false; }
+}
+
+async function rafraichir() {
+  const rel = await api('GET', '/api/relations');
+  $('relations').textContent = rel.join('\n');
+  const j = await api('GET', '/api/journal');
+  $('journal').innerHTML = '<tr><th>Heure</th><th>Qui</th><th>Action</th><th>Objet</th><th>Décision</th></tr>' +
+    j.map((e) => `<tr><td>${e.heure}</td><td>${e.utilisateur}</td><td>${ACTIONS[e.action] || e.action}</td><td>${e.objet}</td>` +
+      `<td class="${e.autorise ? 'ok' : 'non'}">${e.autorise ? 'oui' : 'non'}<span class="detail">${e.par}${e.duree_ms ? ' · ' + e.duree_ms + ' ms' : ''}</span></td></tr>`).join('');
+}
+
+async function deleguer(retirer) {
+  $('message').style.display = 'none'; $('erreur').style.display = 'none';
+  const r = await api('POST', '/api/delegation', { retirer });
+  afficherEtatFanny(r.fannyRetiree);
+  $('message').style.display = 'block';
+  $('message').textContent = retirer ? 'Le rôle de facility manager de fanny est retiré. Relancez le banc de test.' : 'fanny est à nouveau facility manager du bâtiment A.';
+  await mesDroits();
+}
+const afficherEtatFanny = (retiree) => { $('etatFanny').textContent = retiree ? 'État : fanny n’est plus facility manager.' : 'État : fanny est facility manager du bâtiment A.'; };
+
+function montrerErreur(err) {
+  $('erreur').style.display = 'block';
+  $('erreur').textContent = 'Erreur : ' + err.message;
+}
+
+async function demarrer() {
+  CONFIG = await (await fetch('/api/config')).json();
+  $('nomMoteur').textContent = `${CONFIG.moteur.nom} ${CONFIG.moteur.version}`;
+  $('explication').textContent = CONFIG.moteur.explication;
+  $('modele').textContent = CONFIG.moteur.modele;
+  $('regles').innerHTML = CONFIG.regles.map((r) => `<li>${r}</li>`).join('');
+  $('demos').innerHTML = CONFIG.demos.map((d) => `<a href="http://localhost:${d.port}/" class="${d.port === CONFIG.port ? 'actif' : ''}">${d.nom} :${d.port}</a>`).join('') +
+    '<a href="http://localhost:8080/admin/master/console/#/reskin-demo">Keycloak :8080</a>';
+  $('comptes').innerHTML = '<tr><th>Compte</th><th>Rôle Keycloak</th><th>Ce qu’il permet de tester</th></tr>' +
+    CONFIG.comptes.map((c) => `<tr><td><b>${c.nom}</b></td><td>${c.roleKeycloak || '—'}</td><td>${c.type}</td></tr>`).join('');
+  $('btnConnexion').onclick = () => seConnecter().catch(montrerErreur);
+  $('btnDeconnexion').onclick = seDeconnecter;
+  $('btnDroits').onclick = () => mesDroits().catch(montrerErreur);
+  $('btnBanc').onclick = () => banc().catch(montrerErreur);
+  $('btnRetirer').onclick = () => deleguer(true).catch(montrerErreur);
+  $('btnRendre').onclick = () => deleguer(false).catch(montrerErreur);
+  $('voirCache').onchange = () => { if (jeton) dessinerEcran(); };
+
+  if (await terminerConnexion()) {
+    const moi = await api('GET', '/api/moi');
+    $('deconnecte').style.display = 'none';
+    $('connecte').style.display = 'block';
+    $('qui').textContent = moi.utilisateur;
+    $('roles').textContent = moi.rolesApp.length ? moi.rolesApp.join(', ') : 'aucun';
+    const c = CONFIG.comptes.find((x) => x.nom === moi.utilisateur);
+    $('typeCompte').textContent = c ? c.type : '';
+    afficherEtatFanny(moi.fannyRetiree);
+    for (const b of ['btnDroits', 'btnBanc', 'btnRetirer', 'btnRendre']) $(b).disabled = false;
+    await mesDroits();
+  }
+}
+demarrer().catch(montrerErreur);
+</script>
+</body>
+</html>

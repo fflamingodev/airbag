@@ -1,0 +1,29 @@
+# Démo SpiceDB : le moteur + son application (port 3002).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # SpiceDB : le moteur. Données en mémoire ; « cle-de-demo » sert de mot de passe pour l'API.
+  # --telemetry-endpoint= coupe l'envoi de statistiques à AuthZed.
+  spicedb:
+    image: authzed/spicedb:v1.57.0
+    command: ["serve", "--grpc-preshared-key", "cle-de-demo", "--http-enabled",
+              "--datastore-engine", "memory", "--telemetry-endpoint="]
+
+  # L'application de démo pour SpiceDB : la page web + l'API qui pose les questions au moteur
+  app-spicedb:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3002
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+      SPICEDB_URL: http://spicedb:8443
+      SPICEDB_CLE: cle-de-demo
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3002:3002"   # la démo : http://localhost:3002
+    depends_on:
+      - spicedb

@@ -1,0 +1,22 @@
+# Les 6 démos en même temps, avec un seul Keycloak.
+#   Tout lancer :     docker compose up -d        (dans ce dossier Demo)
+#   Voir le journal : docker compose logs -f
+#   Tout arrêter :    docker compose down
+#
+#   Keycloak   http://localhost:8080   (admin / admin)
+#   OpenFGA    http://localhost:3001
+#   SpiceDB    http://localhost:3002
+#   Permify    http://localhost:3003
+#   Casbin     http://localhost:3004
+#   Code maison http://localhost:3005
+#   Keycloak KAS http://localhost:3006
+name: demo-reskin
+
+include:
+  - _commun/docker-compose.yml
+  - OpenFGA/docker-compose.yml
+  - SpiceDB/docker-compose.yml
+  - Permify/docker-compose.yml
+  - Casbin/docker-compose.yml
+  - Code Maison/docker-compose.yml
+  - Keycloak KAS/docker-compose.yml

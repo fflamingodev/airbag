@@ -1,0 +1,25 @@
+# Démo Casbin : le moteur + son application (port 3004).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # L'application de démo pour Casbin : la page web + l'API qui pose les questions au moteur
+  app-casbin:
+    # Casbin est une bibliothèque : on l'installe DANS l'image de l'app (pas de conteneur en plus)
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:22-alpine
+        WORKDIR /deps
+        RUN npm init -y >/dev/null && npm install --omit=dev casbin@5.51.1
+        ENV NODE_PATH=/deps/node_modules
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3004
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3004:3004"   # la démo : http://localhost:3004

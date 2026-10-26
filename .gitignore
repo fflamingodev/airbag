@@ -1,0 +1,10 @@
+# Code source des moteurs : téléchargé depuis leurs dépôts officiels, ce n'est pas notre code.
+# (liens dans le README)
+OpenFGA/openfga-*/
+SpiceDB/spicedb-*/
+Permify/permify-*/
+Casbin/Casbin.NET-*/
+*.zip
+
+# Fichiers générés
+node_modules/

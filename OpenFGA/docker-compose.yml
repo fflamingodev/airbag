@@ -1,0 +1,28 @@
+# Démo OpenFGA : le moteur + son application (port 3001).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # OpenFGA : le moteur. Les données sont en mémoire (perdues à l'arrêt, c'est voulu pour la démo).
+  openfga:
+    image: openfga/openfga:v1.22.0
+    command: ["run"]
+    environment:
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+
+  # L'application de démo pour OpenFGA : la page web + l'API qui pose les questions au moteur
+  app-openfga:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3001
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+      OPENFGA_URL: http://openfga:8080
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3001:3001"   # la démo : http://localhost:3001
+    depends_on:
+      - openfga

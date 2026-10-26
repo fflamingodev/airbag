@@ -1,0 +1,18 @@
+# Démo Code Maison : le moteur + son application (port 3005).
+# Ce fichier est lancé par le docker-compose.yml du dossier Demo (avec Keycloak et les autres démos).
+services:
+  # L'application de démo pour Code Maison : la page web + l'API qui pose les questions au moteur
+  app-code-maison:
+    image: node:22-alpine
+    command: ["node", "/app/server.js"]
+    environment:
+      PORT: 3005
+      MOTEUR: /moteur/moteur.js
+      KEYCLOAK_URL_NAVIGATEUR: http://localhost:8080
+      KEYCLOAK_URL_INTERNE: http://keycloak:8080
+      NODE_OPTIONS: --disable-warning=ExperimentalWarning
+    volumes:
+      - ../_commun/app:/app:ro
+      - ./moteur.js:/moteur/moteur.js:ro
+    ports:
+      - "3005:3005"   # la démo : http://localhost:3005

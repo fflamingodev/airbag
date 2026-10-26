@@ -1,0 +1,318 @@
+{
+  "realm": "reskin-demo",
+  "displayName": "RE-SKIN (démo)",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 7200,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "fr",
+    "en"
+  ],
+  "defaultLocale": "fr",
+  "clients": [
+    {
+      "clientId": "app-demo",
+      "name": "Applications de démo (6 solutions)",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:3001/*",
+        "http://localhost:3002/*",
+        "http://localhost:3003/*",
+        "http://localhost:3004/*",
+        "http://localhost:3005/*",
+        "http://localhost:3006/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+        "http://localhost:3004",
+        "http://localhost:3005",
+        "http://localhost:3006"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3001/*##http://localhost:3002/*##http://localhost:3003/*##http://localhost:3004/*##http://localhost:3005/*##http://localhost:3006/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience app-demo",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "app-demo",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "client": {
+      "app-demo": [
+        {
+          "name": "proprietaire",
+          "description": "Rôle local de l'app : proprietaire"
+        },
+        {
+          "name": "architecte",
+          "description": "Rôle local de l'app : architecte"
+        },
+        {
+          "name": "building-administrator",
+          "description": "Rôle local de l'app : building-administrator"
+        },
+        {
+          "name": "facility-manager",
+          "description": "Rôle local de l'app : facility-manager"
+        },
+        {
+          "name": "event-manager",
+          "description": "Rôle local de l'app : event-manager"
+        },
+        {
+          "name": "technicien",
+          "description": "Rôle local de l'app : technicien"
+        },
+        {
+          "name": "locataire",
+          "description": "Rôle local de l'app : locataire"
+        },
+        {
+          "name": "fabricant",
+          "description": "Rôle local de l'app : fabricant"
+        },
+        {
+          "name": "admin-plateforme",
+          "description": "Rôle local de l'app : admin-plateforme"
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "olivier",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Olivier",
+      "lastName": "Démo",
+      "email": "olivier@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "olivier",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "proprietaire",
+          "locataire"
+        ]
+      }
+    },
+    {
+      "username": "martin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Martin",
+      "lastName": "Démo",
+      "email": "martin@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "martin",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "architecte"
+        ]
+      }
+    },
+    {
+      "username": "bea",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bea",
+      "lastName": "Démo",
+      "email": "bea@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "bea",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "building-administrator"
+        ]
+      }
+    },
+    {
+      "username": "fanny",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Fanny",
+      "lastName": "Démo",
+      "email": "fanny@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "fanny",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "facility-manager"
+        ]
+      }
+    },
+    {
+      "username": "eva",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Eva",
+      "lastName": "Démo",
+      "email": "eva@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "eva",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "event-manager"
+        ]
+      }
+    },
+    {
+      "username": "theo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Theo",
+      "lastName": "Démo",
+      "email": "theo@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "theo",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "technicien"
+        ]
+      }
+    },
+    {
+      "username": "sophie",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sophie",
+      "lastName": "Démo",
+      "email": "sophie@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "sophie",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "locataire"
+        ]
+      }
+    },
+    {
+      "username": "lucas",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Lucas",
+      "lastName": "Démo",
+      "email": "lucas@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "lucas",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "locataire"
+        ]
+      }
+    },
+    {
+      "username": "fabien",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Fabien",
+      "lastName": "Démo",
+      "email": "fabien@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "fabien",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "fabricant"
+        ]
+      }
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Démo",
+      "email": "admin@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "app-demo": [
+          "admin-plateforme"
+        ]
+      }
+    },
+    {
+      "username": "paul",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Paul",
+      "lastName": "Démo",
+      "email": "paul@demo.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "paul",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
